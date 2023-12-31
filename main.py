@@ -4,12 +4,12 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-import config
+from config import BOT_TOKEN
 from handlers import router
 
 
 async def main():
-    bot = Bot(token=config.TOKEN, parse_mode=ParseMode.HTML)
+    bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router=router)
 
