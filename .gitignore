@@ -1,4 +1,6 @@
-*.txt
 *.exe
 *.out
 *.temp
+.idea
+__pycache__
+venv
