@@ -1,4 +1,11 @@
 BOT_TOKEN = "6933743272:AAGWCtUFk7zTI6AyMbpEyki3VoJwq0KJcO4"
-OPENAI_TOKEN = "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"
+OPENAI_TOKEN = "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"
 
-chat_gpt_model = "gpt-3.5-turbo-0613"
+chat_gpt_model = "gpt-3.5-turbo"
+
+db_host = "127.0.0.1"
+db_user = "hlebik"
+db_password = "4572"
+db_name = "bot_users"
+
+user_files_path = "./data/user_messages/"

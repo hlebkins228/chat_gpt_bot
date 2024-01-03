@@ -4,12 +4,13 @@ from config import OPENAI_TOKEN
 from config import chat_gpt_model
 
 
-def get_chat_gpt_response(prompt):
+def get_chat_gpt_response(prompt, messages):
     client = OpenAI(api_key=OPENAI_TOKEN)
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt}]
+    messages.append({"role": "user", "content": prompt})
 
     completion = client.chat.completions.create(model=chat_gpt_model, messages=messages)
+    chat_response_text = completion.choices[0].message.content
 
-    return completion.choices[0].message.content
+    messages.append({"role": "assistant", "content": chat_response_text})
+
+    return chat_response_text, messages

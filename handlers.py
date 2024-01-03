@@ -6,9 +6,12 @@ from random import choice
 
 import text
 from openai_requests import get_chat_gpt_response
+from db import *
 
 
 router = Router()
+
+db_connect_status, db_connect_thread = db_connect()
 
 
 @router.message(Command("start"))
@@ -18,7 +21,20 @@ async def start_handler(message: Message):
 
 @router.message()
 async def user_request_handler(message: Message):
-    await message.answer(choice(text.waiting_list))
-    answer_text = get_chat_gpt_response(message.text)
-    await message.answer(answer_text)
+    await message.answer(choice(text.waiting_list))     # Отправляет сообщение о том, что запрос принят в обработку
 
+    if db_connect_status:
+        response = db_get_user_filename(db_connect_thread, message.from_user.id)
+        if response[0]:
+            filename = response[1]
+        else:
+            filename = db_add_user(db_connect_thread, message.from_user.id, message.from_user.username)
+
+        user_messages_list = get_user_messages(filename)
+        response = get_chat_gpt_response(message.text, user_messages_list)
+
+        await message.answer(response[0])
+
+        save_user_messages(filename, response[1])
+    else:
+        await message.answer(text.tech_problems_message)
