@@ -8,6 +8,7 @@ def db_connect():
     try:
         connection = psycopg2.connect(host=db_host, user=db_user, password=db_password, database=db_name)
     except Exception as _ex:        # TODO: сделать полноценную обработку ошибок открытия и тд
+        print("[INFO] database connection failed: ", _ex)
         return False, _ex
     else:
         return True, connection
@@ -70,11 +71,27 @@ def save_user_messages(filename, new_messages_list):
         pickle.dump(new_messages_list, file)
 
 
+def change_user_model(filename, new_model):
+    user_messages = get_user_messages(filename)
+
+    system_role_found = False
+    for item in user_messages:
+        if item["role"] == "system":
+            system_role_found = True
+            item["content"] = new_model
+
+    if not system_role_found:
+        user_messages.append({"role": "system", "content": new_model})
+
+    save_user_messages(filename, user_messages)
+
+
 def clear_user_messages(filename):
     file_path = user_files_path + filename
 
     with open(file_path, "wb") as file:
-        pass
+        messages_empty_list = list()
+        pickle.dump(messages_empty_list, file)
 
 
 def __test(connection):
@@ -95,3 +112,4 @@ def __db_print(connection):
     print(cursor.fetchall())
 
 
+connection = db_connect()

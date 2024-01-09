@@ -9,3 +9,5 @@ db_password = "4572"
 db_name = "bot_users"
 
 user_files_path = "./data/user_messages/"
+
+admin_id = "943916529"
