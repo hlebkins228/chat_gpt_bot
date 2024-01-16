@@ -2,5 +2,11 @@
 *.out
 *.temp
 .idea
+*.log
+*.pickle
+
 __pycache__
 venv
+data
+
+
