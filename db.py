@@ -43,10 +43,7 @@ def db_get_user_filename(connection, user_id):
 def db_add_user(connection, user_id, user_login):
     cursor = connection.cursor()
 
-    filename = f"{user_id}.pickle"
-    with open(user_files_path + filename, "wb") as file:
-        messages_list_init = list()
-        pickle.dump(messages_list_init, file)
+    create_user_messages(user_id=user_id)
 
     cursor.execute(
         f"""INSERT INTO users (id, user_login, messages_file_name) VALUES
@@ -57,11 +54,31 @@ def db_add_user(connection, user_id, user_login):
     return filename
 
 
+def create_user_messages(user_id=False, filename=False):
+    if not filename and user_id:
+        filename = f"{user_id}.pickle"
+    else if filename:
+        pass
+    else:
+        return None
+
+    with open(user_files_path + filename, "wb") as file:
+        messages_list_init = list()
+        pickle.dump(messages_list_init, file)
+
+
 def get_user_messages(filename):
     file_path = user_files_path + filename
 
-    with open(file_path, "rb") as file:
-        return pickle.load(file)
+    try:
+        file = open(file_path, "rb")
+    except FileNotFoundError:
+        return False, FileNotFoundError
+    else:
+        data = pickle.load(file)
+        file.close()
+
+        return True, data
 
 
 def save_user_messages(filename, new_messages_list):

@@ -93,7 +93,13 @@ async def user_request_handler(message: Message):
         else:
             filename = db_add_user(db_connect_thread, message.from_user.id, message.from_user.username)
 
-        user_messages_list = get_user_messages(filename)
+        user_messages = get_user_messages(filename)
+        if not user_messages[0]:
+            create_user_messages(filename=filename)
+            user_messages_list = get_user_messages(filename)[-1]
+        else:
+            user_messages_list = user_messages[-1]
+
         response = get_chat_gpt_response(message.text, user_messages_list)
 
         if response[0]:
