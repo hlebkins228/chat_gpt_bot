@@ -4,9 +4,9 @@ from config import db_host, db_password, db_name, db_user
 from config import user_files_path
 
 
-def db_connect():
+def db_connect(host=db_host, name=db_name, user=db_user, password=db_password):
     try:
-        connection = psycopg2.connect(host=db_host, user=db_user, password=db_password, database=db_name)
+        connection = psycopg2.connect(host=host, user=user, password=password, database=name)
     except Exception as _ex:        # TODO: сделать полноценную обработку ошибок открытия и тд
         print("[INFO] database connection failed: ", _ex)
         return False, _ex
@@ -110,6 +110,3 @@ def __db_print(connection):
     cursor.execute("SELECT * FROM users;")
 
     print(cursor.fetchall())
-
-
-connection = db_connect()

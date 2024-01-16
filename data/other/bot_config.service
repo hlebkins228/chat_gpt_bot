@@ -1,0 +1,12 @@
+[Unit]
+Description=Telegram bot for chatGPT requests
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/hleb.com/bot/venv/bin/python /home/hleb.com/bot/main.py
+WorkingDirectory=/home/hleb.com/bot
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

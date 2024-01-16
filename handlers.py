@@ -1,23 +1,23 @@
 from aiogram.exceptions import TelegramBadRequest
-from aiogram import Router, F, Bot
-from aiogram.enums.parse_mode import ParseMode
+from aiogram import F, Router, Bot
 from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from states import BotStates
+from aiogram.enums.parse_mode import ParseMode
 
 from random import choice
-
 import text
 from openai_requests import get_chat_gpt_response
 from db import *
 from keyboard import reply_keyboard
-from config import BOT_TOKEN, admin_id
+from config import admin_id, BOT_TOKEN
+from config import debug_host, debug_name, debug_password, debug_user
 
 bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
 router = Router()
 
-db_connect_status, db_connect_thread = db_connect()
+db_connect_status, db_connect_thread = db_connect(host=debug_host, name=debug_name, user=debug_user, password=debug_password)
 
 
 @router.message(Command("start"))
@@ -96,11 +96,14 @@ async def user_request_handler(message: Message):
         user_messages_list = get_user_messages(filename)
         response = get_chat_gpt_response(message.text, user_messages_list)
 
-        try:
-            await message.answer(response[0], reply_markup=reply_keyboard, disable_web_page_preview=True)
-        except TelegramBadRequest:
-            await message.answer(text.bad_request_text)
+        if response[0]:
+            try:
+                await message.answer(response[1], disable_web_page_preview=True)
+            except TelegramBadRequest:
+                await message.answer(text.bad_request_text)
+            else:
+                save_user_messages(filename, response[2])
         else:
-            save_user_messages(filename, response[1])
+            await message.answer(text.openai_error_text)
     else:
         await message.answer(text.tech_problems_message)
