@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from states import BotStates
 from aiogram.enums.parse_mode import ParseMode
+from openai import AuthenticationError, BadRequestError
 
 from random import choice
 import text
@@ -109,7 +110,9 @@ async def user_request_handler(message: Message):
                 await message.answer(text.bad_request_text)
             else:
                 save_user_messages(filename, response[2])
-        else:
+        elif response[1] == BadRequestError:
+            await message.answer(text.session_overflow_text)
+        elif response[1] == AuthenticationError:
             await message.answer(text.openai_error_text)
     else:
         await message.answer(text.tech_problems_message)
