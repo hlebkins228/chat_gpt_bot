@@ -5,20 +5,23 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from states import BotStates
 from aiogram.enums.parse_mode import ParseMode
+from openai import AuthenticationError, BadRequestError
 
 from random import choice
 import text
 from openai_requests import get_chat_gpt_response
 from db import *
 from keyboard import reply_keyboard
-from config import admin_id, BOT_TOKEN
+from config import admin_id, BOT_TOKEN, DEBUG_MODE
 from config import debug_host, debug_name, debug_password, debug_user
 
 bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
 router = Router()
 
-db_connect_status, db_connect_thread = db_connect(host=debug_host, name=debug_name, user=debug_user, password=debug_password)
-
+if DEBUG_MODE:
+    db_connect_status, db_connect_thread = db_connect(host=debug_host, name=debug_name, user=debug_user, password=debug_password)
+else:
+    db_connect_status, db_connect_thread = db_connect()
 
 @router.message(Command("start"))
 async def start_handler(message: Message, state: FSMContext):
@@ -85,7 +88,7 @@ async def new_model_hendler(message: Message, state: FSMContext):
 
 @router.message()
 async def user_request_handler(message: Message):
-    await message.answer(choice(text.waiting_list))     # Отправляет сообщение о том, что запрос принят в обработку
+    wait_message = await message.answer(choice(text.waiting_list))     # Отправляет сообщение о том, что запрос принят в обработку
     if db_connect_status:
         response = db_get_user_filename(db_connect_thread, message.from_user.id)
         if response[0]:
@@ -102,6 +105,8 @@ async def user_request_handler(message: Message):
 
         response = get_chat_gpt_response(message.text, user_messages_list)
 
+        await wait_message.delete()     # удаляем сообщение-просьбу об ожидании
+
         if response[0]:
             try:
                 await message.answer(response[1], disable_web_page_preview=True)
@@ -109,7 +114,10 @@ async def user_request_handler(message: Message):
                 await message.answer(text.bad_request_text)
             else:
                 save_user_messages(filename, response[2])
-        else:
+        elif response[1] == BadRequestError:
+            await message.answer(text.session_overflow_text)
+        elif response[1] == AuthenticationError:
             await message.answer(text.openai_error_text)
     else:
+        await wait_message.delete()
         await message.answer(text.tech_problems_message)

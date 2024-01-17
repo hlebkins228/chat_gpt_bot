@@ -43,7 +43,7 @@ def db_get_user_filename(connection, user_id):
 def db_add_user(connection, user_id, user_login):
     cursor = connection.cursor()
 
-    create_user_messages(user_id=user_id)
+    filename = create_user_messages(user_id=user_id)
 
     cursor.execute(
         f"""INSERT INTO users (id, user_login, messages_file_name) VALUES
@@ -57,7 +57,7 @@ def db_add_user(connection, user_id, user_login):
 def create_user_messages(user_id=False, filename=False):
     if not filename and user_id:
         filename = f"{user_id}.pickle"
-    else if filename:
+    elif filename:
         pass
     else:
         return None
@@ -65,6 +65,8 @@ def create_user_messages(user_id=False, filename=False):
     with open(user_files_path + filename, "wb") as file:
         messages_list_init = list()
         pickle.dump(messages_list_init, file)
+    
+    return filename
 
 
 def get_user_messages(filename):
@@ -89,7 +91,13 @@ def save_user_messages(filename, new_messages_list):
 
 
 def change_user_model(filename, new_model):
-    user_messages = get_user_messages(filename)
+    response = get_user_messages(filename)
+    
+    if not response[0]:
+        create_user_messages(filename=filename)
+        response = get_user_messages(filename)
+    
+    user_messages = response[-1]
 
     system_role_found = False
     for item in user_messages:

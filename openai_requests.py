@@ -1,5 +1,5 @@
 from openai import OpenAI
-from openai import AuthenticationError
+from openai import AuthenticationError, BadRequestError
 
 from config import OPENAI_TOKEN
 from config import chat_gpt_model
@@ -13,6 +13,8 @@ def get_chat_gpt_response(prompt, messages):
         completion = client.chat.completions.create(model=chat_gpt_model, messages=messages)
     except AuthenticationError:
         return False, AuthenticationError
+    except BadRequestError:
+        return False, BadRequestError
     else:
         chat_response_text = completion.choices[0].message.content
         messages.append({"role": "assistant", "content": chat_response_text})

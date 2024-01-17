@@ -3,7 +3,7 @@ import logging
 from aiogram import Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from datetime import datetime as date
-from config import log_file_path
+from config import log_file_path, DEBUG_MODE
 
 from handlers import bot, router, db_connect_thread
 
@@ -27,7 +27,11 @@ def log_file_create() -> str:
 
 
 if __name__ == "__main__":
-    log_file_name = log_file_create()
-    logging.basicConfig(filename=log_file_name, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    if DEBUG_MODE:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        log_file_name = log_file_create()
+        logging.basicConfig(filename=log_file_name, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
     asyncio.run(main())
     db_connect_thread.close()

@@ -3,6 +3,9 @@ OPENAI_TOKEN = "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"
 
 chat_gpt_model = "gpt-3.5-turbo"
 
+# DEBUG_MODE (if True - use debug data, print logs into stderr and etc)
+DEBUG_MODE = True
+
 # MAIN(server) db_data
 db_host = "127.0.0.1"
 db_user = "hleb_db"
